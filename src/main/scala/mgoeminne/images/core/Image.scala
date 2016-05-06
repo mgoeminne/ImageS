@@ -12,12 +12,12 @@ import javax.swing.{ImageIcon, JFrame, JLabel, JPanel}
   */
 abstract class Image(buffer: BufferedImage)
 {
-   def draw(): Unit =
+   def draw(title: String = ""): Unit =
    {
       val picLabel = new JLabel(new ImageIcon(buffer))
       val pane = new JPanel()
       pane.add(picLabel);
-      val frame = new JFrame()
+      val frame = new JFrame(title)
       frame.setContentPane(pane)
       frame.pack()
       frame.setVisible(true)
