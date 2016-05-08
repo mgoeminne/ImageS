@@ -15,7 +15,7 @@ class GreyScaleImage(buffer: BufferedImage) extends Image(buffer)
      */
    def normalized() =
    {
-      val array = pixels
+      val array = floatPixels
       val min = array.min
       val max = array.max
 
@@ -42,25 +42,30 @@ class GreyScaleImage(buffer: BufferedImage) extends Image(buffer)
 
    /**
      * Transforms this image by applying a [0,1] -> [0,1] function to each of its pixels.
+     *
      * @param f A function defining the transformation of each of the pixels. Must be [0,1] -> [0,1]
      * @return A new greyscale function, corresponding to this after the transformation function
      *         has been applied to each of its pixels.
      */
-   def transform(f: Float => Float): GreyScaleImage = GreyScaleImage(pixels.map(f), width, height)
+   def transform(f: Float => Float): GreyScaleImage = GreyScaleImage(floatPixels.map(f), width, height)
 
    def reverse: GreyScaleImage = transform(x => 1-x)
 
-   def binarize(threshold: Float) = BinaryImage(pixels.map(_ >= threshold), width, height)
+   def binarize(threshold: Float) = BinaryImage(floatPixels.map(_ >= threshold), width, height)
 
 
-   def pixels = this.buffer.getRaster().getDataBuffer match {
+   def floatPixels = this.buffer.getRaster().getDataBuffer match {
       case x: DataBufferByte => x.getData map GreyScaleImage.byte2Float
+   }
+
+   def bytePixels = this.buffer.getRaster().getDataBuffer match {
+      case x: DataBufferByte => x.getData
    }
 }
 
 object GreyScaleImage
 {
-   private def float2Byte(pixel: Float): Byte =
+   def float2Byte(pixel: Float): Byte =
    {
       val range = (Byte.MaxValue.toFloat - Byte.MinValue.toFloat)
       val value = (range * pixel) + Byte.MinValue
@@ -73,7 +78,7 @@ object GreyScaleImage
      * @param pixel a pixel value expressed as a byte.
      * @return the same value expressed as a float in [0,1]
      */
-   private def byte2Float(pixel: Byte) = (pixel - Byte.MinValue).toFloat / (Byte.MaxValue.toFloat - Byte.MinValue.toFloat)
+   def byte2Float(pixel: Byte) = (pixel - Byte.MinValue).toFloat / (Byte.MaxValue.toFloat - Byte.MinValue.toFloat)
 
    /**
      * Generates a new greyscale image based on an array of float, each of them being in [0,1]

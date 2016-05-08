@@ -11,15 +11,18 @@ object Main
    {
       val test = Image(new File("/Users/mg/Documents/interblocage.jpg"))
 
-      val channels = test.decompose
+      val grey = test.asGreyScale()
 
-      channels._1.draw("alpha")
-      channels._2.draw("red")
-      channels._3.draw("green")
-      channels._4.draw("blue")
+      val t = test.decompose
 
+      val a = t._1
+      val r = t._2
+      val g = t._3
+      val b = t._4
 
+      val recompose = RGBImage(a, r, g, b)
 
+      test.draw("original")
+      recompose.draw("recomposed")
    }
-
 }

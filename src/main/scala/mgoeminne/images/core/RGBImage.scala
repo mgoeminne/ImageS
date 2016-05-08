@@ -18,30 +18,35 @@ case class RGBImage(buffer: BufferedImage) extends Image(buffer)
 
    /**
      * Extract the red component of the image.
+ *
      * @return the greyscale image corresponding to the red component of this image.
      */
-   def red(): GreyScaleImage = pixels2Channel(getPixels, argb2red)
+   def red(): GreyScaleImage = pixels2Channel(intPixels, argb2red)
 
    /**
      * Extract the green component of the image.
+ *
      * @return the greyscale image corresponding to the green component of this image.
      */
-   def green(): GreyScaleImage = pixels2Channel(getPixels, argb2green)
+   def green(): GreyScaleImage = pixels2Channel(intPixels, argb2green)
 
    /**
      * Extract the blue component of the image.
+ *
      * @return the greyscale image corresponding to the blue component of this image.
      */
-   def blue(): GreyScaleImage = pixels2Channel(getPixels, argb2blue)
+   def blue(): GreyScaleImage = pixels2Channel(intPixels, argb2blue)
 
    /**
      * Extract the alpha component of the image.
+ *
      * @return the greyscale image corresponding to the alpha component of this image.
      */
-   def alpha(): GreyScaleImage = pixels2Channel(getPixels, argb2alpha)
+   def alpha(): GreyScaleImage = pixels2Channel(intPixels, argb2alpha)
 
    /**
      * Decomposes this ARGB image into its four channels.
+ *
      * @return The greyscale images corresponding to the alpha, red, green, and blue components,
      *         respectively.
      */
@@ -81,7 +86,7 @@ case class RGBImage(buffer: BufferedImage) extends Image(buffer)
       new GreyScaleImage(ret)
    }
 
-   private def getPixels() =
+   def intPixels() =
    {
       val width = buffer.getWidth
       val height = buffer.getHeight
@@ -90,5 +95,39 @@ case class RGBImage(buffer: BufferedImage) extends Image(buffer)
       buffer.getRGB(0, 0, width, height, rgb, 0, width)
 
       rgb
+   }
+}
+
+object RGBImage
+{
+   def apply(alpha: GreyScaleImage,
+             red: GreyScaleImage,
+             green: GreyScaleImage,
+             blue: GreyScaleImage) =
+   {
+      val ret = new BufferedImage(alpha.width, alpha.height, BufferedImage.TYPE_4BYTE_ABGR)
+
+      val a = alpha.bytePixels
+      val r = red.bytePixels
+      val g = green.bytePixels
+      val b = blue.bytePixels
+
+      val pixels = new Array[Int](4*a.size)
+
+      (0 until a.size).foreach(i => {
+         pixels(i*4) = r(i).toInt
+         pixels(i*4+1) = g(i).toInt
+         pixels(i*4+2) = b(i).toInt
+         pixels(i*4+3) = a(i).toInt
+      })
+
+      ret.getRaster.setPixels(
+         0,
+         0,
+         alpha.width,
+         alpha.height,
+         pixels)
+
+      new RGBImage(ret)
    }
 }
