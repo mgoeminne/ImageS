@@ -46,6 +46,9 @@ abstract class Image(buffer: BufferedImage)
 
       other
    }
+
+   def width: Int = this.buffer.getData.getWidth
+   def height: Int = this.buffer.getData.getHeight
 }
 
 object Image
