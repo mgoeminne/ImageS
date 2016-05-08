@@ -46,12 +46,12 @@ class GreyScaleImage(buffer: BufferedImage) extends Image(buffer)
      * @return A new greyscale function, corresponding to this after the transformation function
      *         has been applied to each of its pixels.
      */
-   def transform(f: Float => Float): GreyScaleImage =
-   {
-      GreyScaleImage(pixels.map(f), width, height)
-   }
+   def transform(f: Float => Float): GreyScaleImage = GreyScaleImage(pixels.map(f), width, height)
 
    def reverse: GreyScaleImage = transform(x => 1-x)
+
+   def binarize(threshold: Float) = BinaryImage(pixels.map(_ >= threshold), width, height)
+
 
    def pixels = this.buffer.getRaster().getDataBuffer match {
       case x: DataBufferByte => x.getData map GreyScaleImage.byte2Float
