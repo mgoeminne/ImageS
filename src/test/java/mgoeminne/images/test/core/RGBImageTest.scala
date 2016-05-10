@@ -22,6 +22,15 @@ class RGBImageTest extends FlatSpec with Matchers
    {
       val origin = Image(new File("demo/images/interblocage.jpg"))
       val doubleFlip = origin.horizontalFlip.horizontalFlip
+
+      origin shouldBe doubleFlip
+   }
+
+   "Double vertically flipped image" should "correspond to the image itself" in
+   {
+      val origin = Image(new File("demo/images/interblocage.jpg"))
+      val doubleFlip = origin.verticalFlip.verticalFlip
+
       origin shouldBe doubleFlip
    }
 }
