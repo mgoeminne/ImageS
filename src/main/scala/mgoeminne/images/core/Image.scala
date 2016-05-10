@@ -47,6 +47,8 @@ abstract class Image(buffer: BufferedImage)
       other
    }
 
+   override def hashCode = this.buffer.hashCode
+
    def width: Int = this.buffer.getData.getWidth
    def height: Int = this.buffer.getData.getHeight
 }
