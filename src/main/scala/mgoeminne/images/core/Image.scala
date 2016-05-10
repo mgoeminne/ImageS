@@ -10,7 +10,7 @@ import javax.swing.{ImageIcon, JFrame, JLabel, JPanel}
 /**
   * A generic representation of an image.
   */
-abstract class Image(buffer: BufferedImage)
+abstract class Image[T <: Image[T]] (buffer: BufferedImage)
 {
    def draw(title: String = ""): Unit =
    {
@@ -51,6 +51,18 @@ abstract class Image(buffer: BufferedImage)
 
    def width: Int = this.buffer.getData.getWidth
    def height: Int = this.buffer.getData.getHeight
+
+   /**
+     * Flips the image horizontally, so that left pixels correspond to the right pixels, and vice versa.
+     * @return A horizontally flipped version of this image.
+     */
+   def horizontalFlip: T
+
+   /**
+     * Flips the image vertically, so that top pixels correspond to the bottom pixels, and vice versa.
+     * @return A vertically flipped version of this image.
+     */
+   def verticalFlip: T
 }
 
 object Image

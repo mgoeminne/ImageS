@@ -7,7 +7,7 @@ import scala.concurrent.{Await, Future}
 /**
   * A ARGB based image.
   */
-case class RGBImage(buffer: BufferedImage) extends Image(buffer)
+case class RGBImage(buffer: BufferedImage) extends Image[RGBImage](buffer)
 {
    override def asRGB() = this
 
@@ -98,26 +98,18 @@ case class RGBImage(buffer: BufferedImage) extends Image(buffer)
       rgb
    }
 
-   /**
-     * Horizontally flips this image, so that left pixels correspond to the right pixels, and vice versa.
-     * @return An horizontally flipped version of this image.
-     */
-   def horizontalFlip =
+   override def horizontalFlip =
    {
-      val tmp = intPixels.sliding(width, width).map(_.reverse).flatten.toArray
+      val tmp = intPixels.grouped(width).map(_.reverse).flatten.toArray
       val ret = new BufferedImage(width, height, BufferedImage.TYPE_4BYTE_ABGR)
       ret.setRGB(0, 0, width, height, tmp, 0, width)
 
       new RGBImage(ret)
    }
 
-   /**
-     * Vertically flips this image, so that top pixels correspond to the bottom pixels, and vice versa.
-     * @return An horizontally flipped version of this image.
-     */
-   def verticalFlip =
+   override def verticalFlip =
    {
-      val tmp = intPixels.sliding(width, width).toArray.reverse.flatten
+      val tmp = intPixels.grouped(width).toArray.reverse.flatten
       val ret = new BufferedImage(width, height, BufferedImage.TYPE_4BYTE_ABGR)
       ret.setRGB(0, 0, width, height, tmp, 0, width)
 

@@ -1,13 +1,40 @@
 package mgoeminne.images.core
 
-import java.awt.image.BufferedImage
+import java.awt.image.{BufferedImage, DataBufferByte}
 
 /**
   * Binary coded image.
   */
-class BinaryImage(buffer: BufferedImage) extends Image(buffer)
+class BinaryImage(buffer: BufferedImage) extends Image[BinaryImage](buffer)
 {
    override def asBinary() = this
+
+   /**
+     * Transforms the binary image into an array of integers representing it.
+     * Each value is 1 for true, and 0 for false.
+     * @return an array of integers representing the binary image;
+     */
+   def integerPixels = buffer.getRaster.getPixels(0,0, width, height, new Array[Int](width*height))
+
+   override def horizontalFlip: BinaryImage =
+   {
+      val ret = new BufferedImage(width, height, BufferedImage.TYPE_BYTE_BINARY)
+      ret.getRaster.setPixels(0, 0, width, height, integerPixels.grouped(width).map(_.reverse).toArray.flatten)
+
+      new BinaryImage(ret)
+   }
+
+   /**
+     * Vertically flips this image, so that top pixels correspond to the bottom pixels, and vice versa.
+     * @return An horizontally flipped version of this image.
+     */
+   override def verticalFlip: BinaryImage =
+   {
+      val ret = new BufferedImage(width, height, BufferedImage.TYPE_BYTE_BINARY)
+      ret.getRaster.setPixels(0, 0, width, height, integerPixels.grouped(width).toArray.reverse.flatten)
+
+      new BinaryImage(ret)
+   }
 }
 
 object BinaryImage
