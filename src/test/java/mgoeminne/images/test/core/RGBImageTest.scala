@@ -1,7 +1,6 @@
 package mgoeminne.images.test.core
 
 import java.io.File
-import java.lang.instrument.Instrumentation
 
 import mgoeminne.images.core.{Image, RGBImage}
 import org.scalatest.{FlatSpec, Matchers}

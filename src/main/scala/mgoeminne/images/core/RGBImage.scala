@@ -135,6 +135,14 @@ case class RGBImage(buffer: BufferedImage) extends Image(buffer)
 
 object RGBImage
 {
+   /**
+     * Generates a new ARGB image based on four channels, each of them being represented by a greyscale image.
+     * @param alpha  the alpha channel
+     * @param red    the red channel
+     * @param green  the green channel
+     * @param blue   the blue channel
+     * @return       the ARGB image corresponding to the four provided channels.
+     */
    def apply(alpha: GreyScaleImage,
              red: GreyScaleImage,
              green: GreyScaleImage,
