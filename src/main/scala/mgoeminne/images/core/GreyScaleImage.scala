@@ -61,6 +61,39 @@ class GreyScaleImage(buffer: BufferedImage) extends Image(buffer)
    def bytePixels = this.buffer.getRaster().getDataBuffer match {
       case x: DataBufferByte => x.getData
    }
+
+   /**
+     * Horizontally flips this image, so that left pixels correspond to the right pixels, and vice versa.
+     * @return An horizontally flipped version of this image.
+     */
+   def horizontalFlip =
+   {
+      val tmp = bytePixels.sliding(width, width).map(_.reverse).flatten.toArray.map(_.toInt)
+      val ret = new BufferedImage(width, height, BufferedImage.TYPE_BYTE_GRAY)
+      ret.getRaster.setPixels(0, 0, width, height, tmp)
+
+      new GreyScaleImage(ret)
+   }
+
+   /**
+     * Vertically flips this image, so that top pixels correspond to the bottom pixels, and vice versa.
+     * @return An horizontally flipped version of this image.
+     */
+   def verticalFlip =
+   {
+      val tmp = bytePixels.sliding(width, width).toArray.reverse.flatten.map(_.toInt)
+      val ret = new BufferedImage(width, height, BufferedImage.TYPE_BYTE_GRAY)
+      ret.getRaster.setPixels(0, 0, width, height, tmp)
+
+      new GreyScaleImage(ret)
+   }
+
+   override def equals(that: Any) = {
+      that match {
+         case x: GreyScaleImage => this.bytePixels.deep == x.bytePixels.deep
+         case _ => false
+      }
+   }
 }
 
 object GreyScaleImage
