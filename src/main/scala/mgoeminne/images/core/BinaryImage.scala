@@ -12,6 +12,7 @@ class BinaryImage(buffer: BufferedImage) extends Image[BinaryImage](buffer)
    /**
      * Transforms the binary image into an array of integers representing it.
      * Each value is 1 for true, and 0 for false.
+     *
      * @return an array of integers representing the binary image;
      */
    def integerPixels = buffer.getRaster.getPixels(0,0, width, height, new Array[Int](width*height))
@@ -26,6 +27,7 @@ class BinaryImage(buffer: BufferedImage) extends Image[BinaryImage](buffer)
 
    /**
      * Vertically flips this image, so that top pixels correspond to the bottom pixels, and vice versa.
+     *
      * @return An horizontally flipped version of this image.
      */
    override def verticalFlip: BinaryImage =
@@ -35,6 +37,19 @@ class BinaryImage(buffer: BufferedImage) extends Image[BinaryImage](buffer)
 
       new BinaryImage(ret)
    }
+
+   override def equals(that: Any) = {
+      that match {
+         case x: BinaryImage => this.integerPixels.deep == x.integerPixels.deep
+         case _ => false
+      }
+   }
+
+   override def rotate90: BinaryImage = ???
+
+   override def rotate180: BinaryImage = ???
+
+   override def rotate270: BinaryImage = ???
 }
 
 object BinaryImage
