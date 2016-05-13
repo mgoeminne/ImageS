@@ -10,6 +10,13 @@ class GreyScaleImage(buffer: BufferedImage) extends Image[GreyScaleImage](buffer
 {
    override def asGreyScale(): GreyScaleImage = this
 
+   override def makeImage(pixels: Array[Int], width: Int, height: Int) = {
+      val ret = new BufferedImage(buffer.getWidth(), buffer.getHeight(), BufferedImage.TYPE_BYTE_GRAY)
+      ret.getRaster.setPixels(0, 0, width, height, pixels)
+
+      new GreyScaleImage(ret)
+   }
+
    /**
      * Linearly the image in such a way the lowest grey tone becomes 0
      * and the highest grey tone becomes 1.
@@ -61,24 +68,6 @@ class GreyScaleImage(buffer: BufferedImage) extends Image[GreyScaleImage](buffer
 
    def bytePixels = this.buffer.getRaster().getDataBuffer match {
       case x: DataBufferByte => x.getData
-   }
-
-   override def horizontalFlip =
-   {
-      val tmp = bytePixels.grouped(width).map(_.reverse).flatten.toArray.map(_.toInt)
-      val ret = new BufferedImage(width, height, BufferedImage.TYPE_BYTE_GRAY)
-      ret.getRaster.setPixels(0, 0, width, height, tmp)
-
-      new GreyScaleImage(ret)
-   }
-
-   override def verticalFlip =
-   {
-      val tmp = bytePixels.grouped(width).toArray.reverse.flatten.map(_.toInt)
-      val ret = new BufferedImage(width, height, BufferedImage.TYPE_BYTE_GRAY)
-      ret.getRaster.setPixels(0, 0, width, height, tmp)
-
-      new GreyScaleImage(ret)
    }
 
    override def equals(that: Any) = {

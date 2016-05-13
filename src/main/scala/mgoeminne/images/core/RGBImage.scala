@@ -11,6 +11,21 @@ case class RGBImage(buffer: BufferedImage) extends Image[RGBImage](buffer)
 {
    override def asRGB() = this
 
+   override def makeImage(pixels: Array[Int], width: Int, height: Int) =
+   {
+      val ret = new BufferedImage(width, height, BufferedImage.TYPE_4BYTE_ABGR)
+      ret.setRGB(0, 0, width, height, pixels, 0, width)
+      new RGBImage(ret)
+   }
+
+   override def intPixels = {
+      val rgb = new Array[Int](width * height)
+      buffer.getRGB(0, 0, width, height, rgb, 0, width)
+
+      rgb
+   }
+
+
    private def argb2alpha(pixel: Int) = pixel>>24 & 0xff
    private def argb2red(pixel: Int) = pixel >>16 & 0xff
    private def argb2green(pixel: Int) = pixel>>8 & 0xff
@@ -85,37 +100,6 @@ case class RGBImage(buffer: BufferedImage) extends Image[RGBImage](buffer)
 
       new GreyScaleImage(ret)
    }
-
-   /**
-     * @return a table of pixels represented as integer values.
-     *         each integer corresponds to a pixel, one byte per channel, in the
-     *         A,B,G,R order (lower byte first).
-     */
-   def intPixels =
-   {
-      val rgb = new Array[Int](width * height)
-      buffer.getRGB(0, 0, width, height, rgb, 0, width)
-      rgb
-   }
-
-   override def horizontalFlip =
-   {
-      val tmp = intPixels.grouped(width).map(_.reverse).flatten.toArray
-      val ret = new BufferedImage(width, height, BufferedImage.TYPE_4BYTE_ABGR)
-      ret.setRGB(0, 0, width, height, tmp, 0, width)
-
-      new RGBImage(ret)
-   }
-
-   override def verticalFlip =
-   {
-      val tmp = intPixels.grouped(width).toArray.reverse.flatten
-      val ret = new BufferedImage(width, height, BufferedImage.TYPE_4BYTE_ABGR)
-      ret.setRGB(0, 0, width, height, tmp, 0, width)
-
-      new RGBImage(ret)
-   }
-
 
    override def equals(that: Any) = {
       that match {

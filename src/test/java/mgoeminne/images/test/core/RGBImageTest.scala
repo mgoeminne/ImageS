@@ -17,12 +17,26 @@ class RGBImageTest extends FlatSpec with Matchers
       origin shouldBe recomposed
    }
 
-   "Double horizontally flipped image" should "correspond to the image itself" in
+   "Horizontally flipped image" should "be different from the original image" in {
+      val origin = Image(new File("demo/images/interblocage.jpg"))
+      val flip = origin.horizontalFlip
+
+      origin should not be flip
+   }
+
+   "Vertically flipped image" should "be different from the original image" in
    {
       val origin = Image(new File("demo/images/interblocage.jpg"))
-      val doubleFlip = origin.horizontalFlip.horizontalFlip
+      val flip = origin.verticalFlip
 
-      origin shouldBe doubleFlip
+      origin should not be flip
+   }
+
+   "Double horizontally flipped image" should "correspond to the original image" in {
+      val origin = Image(new File("demo/images/interblocage.jpg"))
+      val flip = origin.horizontalFlip.horizontalFlip
+
+      origin shouldBe flip
    }
 
    "Double vertically flipped image" should "correspond to the image itself" in
