@@ -86,25 +86,75 @@ abstract class Image[T <: Image[T]] (buffer: BufferedImage)
    def width: Int = this.buffer.getData.getWidth
    def height: Int = this.buffer.getData.getHeight
 
+   /**
+     * Transposes this images.
+     * @return The transpose of this image.
+     */
+   def transpose: T = {
+      val w = width
+      val matrix = intPixels.grouped(w).toArray
+      val h = height
+
+      val ret = Array.fill(w,h)(0)
+
+      (0 until h).foreach(j => {
+         (0 until w).foreach(i => {
+            ret(i)(j) = matrix(j)(i)
+         })
+      })
+
+      makeImage(ret.flatten, h, w)
+   }
 
    /**
      * Rotates the image by 90° clockwise around its center, with no loss of pixel data.
      * @return this image after a rotation by 90° clockwise.
      */
-   def rotate90: T = ???
+   def rotate90: T = {
+      val w = width
+      val matrix = intPixels
+      val h = height
+
+      val ret = Array.fill(w*h)(0)
+
+      (0 until h).foreach(j => {
+         (0 until w).foreach(i => {
+            ret(i*h + h-1-j) = matrix(j*w + i)
+         })
+      })
+
+      makeImage(ret, h, w)
+   }
 
 
    /**
      * Rotates the image by 180° around its center, with no loss of pixel data.
      * @return this image after a rotation by 180°.
      */
-   def rotate180: T = ???
+   def rotate180: T = makeImage(intPixels.grouped(width).toArray.reverse.map(_.reverse).flatten, width, height)
 
    /**
      * Rotates the image by 270° clockwise around its center, with no loss of pixel data.
      * @return this image after a rotation by 270° clockwise, or 90° counterclockwise.
      */
-   def rotate270: T = ???
+   def rotate270: T =
+   {
+      val w = width
+      val matrix = intPixels
+      val h = height
+
+      val ret = Array.fill(w*h)(0)
+
+      (0 until h).foreach(j => {
+         (0 until w).foreach(i => {
+            ret((w-1-i)*h + j) = matrix(j*w + i)
+         })
+      })
+
+      makeImage(ret, h, w)
+   }
+
+   private def coord(x: Int, y: Int, height: Int) = y*height + x
 }
 
 object Image

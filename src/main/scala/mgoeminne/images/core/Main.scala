@@ -11,9 +11,11 @@ object Main
    {
       val test = Image(new File("demo/images/interblocage.jpg"))
 
-      val grey = test.asBinary()
+      val grey = test.asGreyScale
 
-      grey.draw("original")
-      grey.verticalFlip.draw("modified")
+      //grey.draw("original")
+      //grey.rotate90.draw("90")
+      //grey.rotate180.draw("180")
+      grey.rotate270.draw("270")
    }
 }

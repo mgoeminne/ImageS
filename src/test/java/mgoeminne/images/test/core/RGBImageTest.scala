@@ -46,4 +46,53 @@ class RGBImageTest extends FlatSpec with Matchers
 
       origin shouldBe doubleFlip
    }
+
+   "A rotation by 90°" should "alter the image" in {
+      val origin = Image(new File("demo/images/interblocage.jpg")).asBinary
+      val rot = origin.rotate90
+
+      origin should not be rot
+   }
+
+   "A quadruple rotation by 90°" should "give the initial image" in {
+      val origin = Image(new File("demo/images/interblocage.jpg"))
+      val rot = origin.rotate90.rotate90.rotate90.rotate90
+
+      origin shouldBe rot
+   }
+
+   "A rotation by 180°" should "alter the image" in {
+      val origin = Image(new File("demo/images/interblocage.jpg"))
+      val rot = origin.rotate180
+
+      origin should not be rot
+   }
+
+   "A double rotation by 180°" should "give the initial image" in {
+      val origin = Image(new File("demo/images/interblocage.jpg"))
+      val rot = origin.rotate180.rotate180
+
+      origin shouldBe rot
+   }
+
+   "A rotation by 270°" should "alter the image" in {
+      val origin = Image(new File("demo/images/interblocage.jpg"))
+      val rot = origin.rotate270
+
+      origin should not be rot
+   }
+
+   "A quadruple rotation by 270°" should "give the initial image" in {
+      val origin = Image(new File("demo/images/interblocage.jpg"))
+      val rot = origin.rotate270.rotate270.rotate270.rotate270
+
+      origin shouldBe rot
+   }
+
+   "A rotation by 90° + 270°" should "give the initial image" in {
+      val origin = Image(new File("demo/images/interblocage.jpg"))
+      val rot = origin.rotate90.rotate270
+
+      origin shouldBe rot
+   }
 }

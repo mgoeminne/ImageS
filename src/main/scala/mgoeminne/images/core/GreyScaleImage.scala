@@ -11,7 +11,7 @@ class GreyScaleImage(buffer: BufferedImage) extends Image[GreyScaleImage](buffer
    override def asGreyScale(): GreyScaleImage = this
 
    override def makeImage(pixels: Array[Int], width: Int, height: Int) = {
-      val ret = new BufferedImage(buffer.getWidth(), buffer.getHeight(), BufferedImage.TYPE_BYTE_GRAY)
+      val ret = new BufferedImage(width, height, BufferedImage.TYPE_BYTE_GRAY)
       ret.getRaster.setPixels(0, 0, width, height, pixels)
 
       new GreyScaleImage(ret)
