@@ -131,7 +131,22 @@ abstract class Image[T <: Image[T]] (buffer: BufferedImage)
      * Rotates the image by 180° around its center, with no loss of pixel data.
      * @return this image after a rotation by 180°.
      */
-   def rotate180: T = makeImage(intPixels.grouped(width).toArray.reverse.map(_.reverse).flatten, width, height)
+   def rotate180: T =
+   {
+      val w = width
+      val matrix = intPixels
+      val h = height
+
+      val ret = Array.fill(w*h)(0)
+
+      (0 until h).foreach(j => {
+         (0 until w).foreach(i => {
+            ret((h-1-j)*w + (w-1-i)) = matrix(j*w + i)
+         })
+      })
+
+      makeImage(ret, w, h)
+   }
 
    /**
      * Rotates the image by 270° clockwise around its center, with no loss of pixel data.
