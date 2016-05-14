@@ -168,8 +168,6 @@ abstract class Image[T <: Image[T]] (buffer: BufferedImage)
 
       makeImage(ret, h, w)
    }
-
-   private def coord(x: Int, y: Int, height: Int) = y*height + x
 }
 
 object Image
