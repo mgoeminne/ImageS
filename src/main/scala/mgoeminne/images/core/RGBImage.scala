@@ -1,13 +1,12 @@
 package mgoeminne.images.core
 
-import java.awt.image.{BufferedImage, DataBufferByte, DataBufferInt}
-
-import scala.concurrent.{Await, Future}
+import java.awt.Color
+import java.awt.image.{BufferedImage}
 
 /**
   * A ARGB based image.
   */
-case class RGBImage(buffer: BufferedImage) extends Image[RGBImage](buffer)
+case class RGBImage(buffer: BufferedImage) extends Image[RGBImage, Color](buffer)
 {
    override def asRGB() = this
 
@@ -17,6 +16,11 @@ case class RGBImage(buffer: BufferedImage) extends Image[RGBImage](buffer)
       ret.setRGB(0, 0, width, height, pixels, 0, width)
       new RGBImage(ret)
    }
+
+   def asInt(value: Color) = ((value.getAlpha & 0xff) << 24) |
+                             ((value.getRed & 0xff) << 16) |
+                             ((value.getGreen & 0xff) << 8) |
+                             (value.getBlue & 0xff)
 
    override def intPixels = {
       val rgb = new Array[Int](width * height)

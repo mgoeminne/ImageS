@@ -7,7 +7,7 @@ import java.awt.image.{BufferedImage, DataBufferByte, Raster}
   * A grey scale image, in which each pixel is expressed as a nuance of grey
   * (safe for work).
   */
-class GreyScaleImage(buffer: BufferedImage) extends Image[GreyScaleImage](buffer)
+class GreyScaleImage(buffer: BufferedImage) extends Image[GreyScaleImage, Byte](buffer)
 {
    override def asGreyScale(): GreyScaleImage = this
 
@@ -17,6 +17,8 @@ class GreyScaleImage(buffer: BufferedImage) extends Image[GreyScaleImage](buffer
 
       new GreyScaleImage(ret)
    }
+
+   def asInt(value: Byte) = value.toInt
 
    /**
      * Linearly the image in such a way the lowest grey tone becomes 0

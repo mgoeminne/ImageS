@@ -10,7 +10,7 @@ import javax.swing.{ImageIcon, JFrame, JLabel, JPanel}
 /**
   * A generic representation of an image.
   */
-abstract class Image[T <: Image[T]] (buffer: BufferedImage)
+abstract class Image[T <: Image[T,R], R] (buffer: BufferedImage)
 {
    def draw(title: String = ""): Unit =
    {
@@ -177,14 +177,13 @@ abstract class Image[T <: Image[T]] (buffer: BufferedImage)
      * @param angle the rotation angle, in degrees.
      * @return this image after a rotation of the specified angle, clockwise.
      */
-   def rotate(angle: Float): T =
+   def rotate(angle: Float, default: R): T =
    {
       val w = width
       val h = height
       val matrix = intPixels
-      val angle_radians = Math.toRadians(angle)
-      val DEFAULT = Int.MinValue
-
+      val angle_radians = Math.toRadians(angle % 360)
+      val default_int = asInt(default)
 
       /**
         * Transforms a cartesian position into a polar position.
@@ -237,11 +236,6 @@ abstract class Image[T <: Image[T]] (buffer: BufferedImage)
       val tr = rotate(w,0, w, h, angle_radians)
       val br = rotate(w,h-1, w, h, angle_radians)
 
-      println(tl)
-      println(bl)
-      println(tr)
-      println(br)
-
       val x_list = List(tl._1, bl._1, tr._1, br._1)
       val y_list = List(tl._2, bl._2, tr._2, br._2)
 
@@ -255,9 +249,6 @@ abstract class Image[T <: Image[T]] (buffer: BufferedImage)
 
       val array = Array.fill[Int](a_width*a_height)(0)
 
-      println(array.size)
-
-
       (0 until a_height).foreach(j => {
          (0 until a_width).foreach(i => {
             val pos = rotate(i, j, a_width, a_height, -angle_radians)
@@ -268,12 +259,14 @@ abstract class Image[T <: Image[T]] (buffer: BufferedImage)
             val orig_y = Math.round(y)
 
             array(j*a_width + i) = if(orig_x >= 0 && orig_x < w && orig_y >= 0 && orig_y < h) matrix(orig_y*w + orig_x)
-                                   else DEFAULT
+                                   else default_int
          })
       })
 
       this.makeImage(array, a_width, a_height)
    }
+
+   protected def asInt(value: R): Int
 }
 
 object Image

@@ -5,7 +5,7 @@ import java.awt.image.{BufferedImage, DataBufferByte}
 /**
   * Binary coded image.
   */
-class BinaryImage(buffer: BufferedImage) extends Image[BinaryImage](buffer)
+class BinaryImage(buffer: BufferedImage) extends Image[BinaryImage, Boolean](buffer)
 {
    override def asBinary() = this
 
@@ -17,6 +17,10 @@ class BinaryImage(buffer: BufferedImage) extends Image[BinaryImage](buffer)
       new BinaryImage(ret)
    }
 
+   def asInt(value: Boolean) = value match {
+      case true => 1
+      case false => 0
+   }
 
    override def equals(that: Any) = {
       that match {
