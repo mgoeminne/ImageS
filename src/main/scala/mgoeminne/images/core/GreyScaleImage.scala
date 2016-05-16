@@ -1,5 +1,6 @@
 package mgoeminne.images.core
 
+import java.awt.Color
 import java.awt.image.{BufferedImage, DataBufferByte, Raster}
 
 /**
@@ -69,6 +70,16 @@ class GreyScaleImage(buffer: BufferedImage) extends Image[GreyScaleImage](buffer
    def bytePixels = this.buffer.getRaster().getDataBuffer match {
       case x: DataBufferByte => x.getData
    }
+
+   /**
+     * Transforms this image into a RGB image, the grey scale being replaced by
+     * a color gradient.
+     *
+     * @param black the color associated to the black color in the grey scale image.
+     * @param white the color associated to the white color in the grey scale image.
+     * @return A color image corresponding to a color mapping of this image.
+     */
+   def colorize(black: Color, white: Color): RGBImage = ???
 
    override def equals(that: Any) = {
       that match {
