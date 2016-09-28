@@ -7,115 +7,46 @@ import java.awt.image.{BufferedImage, DataBufferByte, Raster}
   * A grey scale image, in which each pixel is expressed as a nuance of grey
   * (safe for work).
   */
-class GreyScaleImage(buffer: BufferedImage) extends Image[GreyScaleImage, Byte](buffer)
+class GreyScaleImage(buffer: Array[Byte], width: Int) extends SingleLayerImage[GreyScaleImage, Byte](
+   buffer,
+   width,
+   buffer.size / width)
 {
-   override def asGreyScale(): GreyScaleImage = this
-
-   override def makeImage(pixels: Array[Int], width: Int, height: Int) = {
-      val ret = new BufferedImage(width, height, BufferedImage.TYPE_BYTE_GRAY)
-      ret.getRaster.setPixels(0, 0, width, height, pixels)
-
-      new GreyScaleImage(ret)
-   }
-
-   def asInt(value: Byte) = value.toInt
-
    /**
-     * Linearly the image in such a way the lowest grey tone becomes 0
-     * and the highest grey tone becomes 1.
+     * Linearly the image in such a way the lowest grey tone takes the lowest value,
+     * and the highest grey tone takes the highest value.
      */
    def normalized() =
    {
-      val array = floatPixels
-      val min = array.min
-      val max = array.max
+      val min = buffer.min
+      val max = buffer.max
 
-      def f(x:Float, min: Float, max: Float) =
+      def f(x:Byte, min: Byte, max: Byte) =
       {
          val rangeOrig = max - min
          val ratio = (x-min) / rangeOrig
 
-         ratio
+         (Byte.MinValue + (x*ratio)).toByte
       }
 
-      val ret = new BufferedImage(buffer.getWidth(), buffer.getHeight(), BufferedImage.TYPE_BYTE_GRAY)
-
-      ret.getRaster.setPixels(
-         0,
-         0,
-         buffer.getWidth,
-         buffer.getHeight,
-         array.map(p => f(p, min, max)))
-
-
-      new GreyScaleImage(ret)
+      new GreyScaleImage(buffer.map(pixel => f(pixel, min, max)), width)
    }
+
 
    /**
-     * Transforms this image by applying a [0,1] -> [0,1] function to each of its pixels.
-     *
-     * @param f A function defining the transformation of each of the pixels. Must be [0,1] -> [0,1]
-     * @return A new greyscale function, corresponding to this after the transformation function
-     *         has been applied to each of its pixels.
+     * Reverses the colors of this image: white becomes black, and black becomes white.
+     * @return The reversed version of this image.
      */
-   def transform(f: Float => Float): GreyScaleImage = GreyScaleImage(floatPixels.map(f), width, height)
-
-   def reverse: GreyScaleImage = transform(x => 1-x)
-
-   def binarize(threshold: Float) = BinaryImage(floatPixels.map(_ >= threshold), width, height)
-
-
-   def floatPixels = this.buffer.getRaster().getDataBuffer match {
-      case x: DataBufferByte => x.getData map GreyScaleImage.byte2Float
-   }
-
-   def bytePixels = this.buffer.getRaster().getDataBuffer match {
-      case x: DataBufferByte => x.getData
-   }
+   def reverse: GreyScaleImage = new GreyScaleImage(buffer.map(pixel => (Byte.MaxValue - pixel).toByte), width)
 
    /**
      * Transforms this image into a RGB image, the grey scale being replaced by
      * a color gradient.
-     *
-     * @param black the color associated to the black color in the grey scale image.
-     * @param white the color associated to the white color in the grey scale image.
      * @return A color image corresponding to a color mapping of this image.
      */
-   def colorize(black: Color, white: Color): RGBImage = ???
+   def toRGB(): RGBImage = new RGBImage(this, this, this)
 
-   override def equals(that: Any) = {
-      that match {
-         case x: GreyScaleImage => this.bytePixels.deep == x.bytePixels.deep
-         case _ => false
-      }
-   }
-}
-
-object GreyScaleImage
-{
-   def float2Byte(pixel: Float): Byte =
-   {
-      val range = (Byte.MaxValue.toFloat - Byte.MinValue.toFloat)
-      val value = (range * pixel) + Byte.MinValue
-
-      value.toByte
-   }
-
-   /**
-     * Transforms a pixel value in byte into a pixel value in [0,1]
-     * @param pixel a pixel value expressed as a byte.
-     * @return the same value expressed as a float in [0,1]
-     */
-   def byte2Float(pixel: Byte) = (pixel - Byte.MinValue).toFloat / (Byte.MaxValue.toFloat - Byte.MinValue.toFloat)
-
-   /**
-     * Generates a new greyscale image based on an array of float, each of them being in [0,1]
-     * @param pixels the array of pixels expressed as values in [0,1]
-     * @param width the width of image
-     * @param height the height of image
-     * @return a new greyscale image
-     */
-   def apply(pixels: Array[Float], width: Int, height: Int) =
+   def toBufferedImage() =
    {
       val ret = new BufferedImage(width, height, BufferedImage.TYPE_BYTE_GRAY)
       ret.getRaster.setPixels(
@@ -123,8 +54,10 @@ object GreyScaleImage
          0,
          width,
          height,
-         pixels.map(p => float2Byte(p).toInt))
+         buffer.map(x => x.toInt - Byte.MinValue))
 
-      new GreyScaleImage(ret)
+      ret
    }
+
+   override protected def makeImage(buffer: Array[Byte], width: Int): GreyScaleImage = new GreyScaleImage(buffer, width)
 }

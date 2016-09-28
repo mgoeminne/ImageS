@@ -1,5 +1,6 @@
 package mgoeminne.images.core
 
+import java.awt.Color
 import java.io.File
 
 /**
@@ -9,13 +10,9 @@ object Main
 {
    def main(args: Array[String])
    {
-      val test = Image(new File("demo/images/interblocage.jpg"))
+      val test = RGBImage(new File("demo/images/interblocage.jpg"))
 
-      val grey = test.asGreyScale
-
-      //grey.draw("original")
-      //grey.rotate90.draw("90")
-      //grey.rotate180.draw("180")
-      grey.rotate270.draw("270")
+      //test.draw()
+      test.rotate90.rotate270.draw()
    }
 }

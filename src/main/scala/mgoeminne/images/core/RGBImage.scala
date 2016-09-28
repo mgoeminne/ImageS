@@ -1,187 +1,106 @@
 package mgoeminne.images.core
 
 import java.awt.Color
-import java.awt.image.{BufferedImage}
+import java.awt.image.BufferedImage
+import java.io.File
+import java.net.URL
+import javax.imageio.ImageIO
+
+import scala.Byte.MinValue
 
 /**
   * A ARGB based image.
   */
-case class RGBImage(buffer: BufferedImage) extends Image[RGBImage, Color](buffer)
+case class RGBImage(    r: GreyScaleImage,
+                        g: GreyScaleImage,
+                        b: GreyScaleImage) extends Image[RGBImage, (Byte, Byte, Byte)](r.width, r.height)
 {
-   override def asRGB() = this
-
-   override def makeImage(pixels: Array[Int], width: Int, height: Int) =
+   override def toBufferedImage() =
    {
-      val ret = new BufferedImage(width, height, BufferedImage.TYPE_4BYTE_ABGR)
-      ret.setRGB(0, 0, width, height, pixels, 0, width)
-      new RGBImage(ret)
+      val ret = new BufferedImage(width, height, BufferedImage.TYPE_3BYTE_BGR)
+
+      val pixels = (r.buffer,g.buffer,b.buffer) .zipped
+                                                .toArray
+                                                .flatMap(p => Array(p._1.toInt - MinValue, p._2.toInt - MinValue, p._3.toInt - MinValue))
+
+      ret.getRaster.setPixels(0, 0, width, height, pixels)
+      ret
    }
 
-   def asInt(value: Color) = ((value.getAlpha & 0xff) << 24) |
-                             ((value.getRed & 0xff) << 16) |
-                             ((value.getGreen & 0xff) << 8) |
-                             (value.getBlue & 0xff)
+   override def horizontalFlip: RGBImage = new RGBImage(r.horizontalFlip, g.horizontalFlip, b.horizontalFlip)
 
-   override def intPixels = {
-      val rgb = new Array[Int](width * height)
-      buffer.getRGB(0, 0, width, height, rgb, 0, width)
+   override def verticalFlip: RGBImage = new RGBImage(r.verticalFlip, g.verticalFlip, b.verticalFlip)
 
-      rgb
-   }
+   override def transpose: RGBImage = new RGBImage(r.transpose, g.transpose, b.transpose)
 
+   override def rotate90: RGBImage = new RGBImage(r.rotate90, g.rotate90, b.rotate90)
 
-   private def argb2alpha(pixel: Int) = pixel>>24 & 0xff
-   private def argb2red(pixel: Int) = pixel >>16 & 0xff
-   private def argb2green(pixel: Int) = pixel>>8 & 0xff
-   private def argb2blue(pixel: Int) = pixel & 0xff
+   override def rotate180: RGBImage = new RGBImage(r.rotate180, g.rotate180, b.rotate180)
+
+   override def rotate270: RGBImage = new RGBImage(r.rotate270, g.rotate270, b.rotate270)
 
    /**
-     * Extract the red component of the image.
+     * Rotates the image by an arbitrary angle clockwise around its center.
+     * Since the value of each pixel is approximated, such a rotate may (and typically will)
+     * modify the image, in such a way that even a rotation of 360° doesn't correspond exactly
+     * to the original image.
      *
-     * @return the greyscale image corresponding to the red component of this image.
+     * @param angle the rotation angle, in degrees.
+     * @return this image after a rotation of the specified angle, clockwise.
      */
-   def red(): GreyScaleImage = pixels2Channel(intPixels, argb2red)
+   override def rotate(angle: Float, default: (Byte, Byte, Byte)): RGBImage = new RGBImage(
+      r.rotate(angle, default._1),
+      g.rotate(angle, default._2),
+      b.rotate(angle, default._3)
+   )
 
    /**
-     * Extract the green component of the image.
-     *
-     * @return the greyscale image corresponding to the green component of this image.
+     * @return the relative histogram of this image.
      */
-   def green(): GreyScaleImage = pixels2Channel(intPixels, argb2green)
+   override def histogram: Map[(Byte, Byte, Byte), Float] =
+   (r.buffer, g.buffer, b.buffer)
+      .zipped
+      .map { case (r: Byte, g: Byte, b: Byte) => (r,g,b)}
+      .groupBy(identity).mapValues(value => value.size / r.buffer.size.toFloat)
 
-   /**
-     * Extract the blue component of the image.
-     *
-     * @return the greyscale image corresponding to the blue component of this image.
-     */
-   def blue(): GreyScaleImage = pixels2Channel(intPixels, argb2blue)
+   def toARGB(alpha: Byte) = new ARGBImage(new GreyScaleImage(Array.fill[Byte](r.buffer.size)(alpha), r.width), r, g, b)
 
-   /**
-     * Extract the alpha component of the image.
-     *
-     * @return the greyscale image corresponding to the alpha component of this image.
-     */
-   def alpha(): GreyScaleImage = pixels2Channel(intPixels, argb2alpha)
+   def toARGB(alpha: GreyScaleImage) = new ARGBImage(alpha, r, g, b)
 
-   /**
-     * Decomposes this ARGB image into its four channels.
-     *
-     * @return The greyscale images corresponding to the alpha, red, green, and blue components,
-     *         respectively.
-     */
-   def decompose: (GreyScaleImage, GreyScaleImage, GreyScaleImage, GreyScaleImage) =
-   {
-      val width = buffer.getWidth
-      val height = buffer.getHeight
+   def asGreyScaleImage = new GreyScaleImage( (r.buffer, g.buffer, b.buffer).zipped
+                                                                            .map { case (r,g,b) => ((r.toInt+b.toInt+b.toInt) / 3).toByte } , width)
 
-      val rgb = new Array[Int](width * height)
-      buffer.getRGB(0, 0, width, height, rgb, 0, width)
+   override protected def singleBuffer: Array[(Byte, Byte, Byte)] =
+      (0 until r.buffer.size).map(i => (r.buffer(i), g.buffer(i), b.buffer(i))).toArray
 
-
-      val red = rgb map argb2red
-      val green = rgb map argb2green
-      val blue = rgb map argb2blue
-
-      val a = pixels2Channel(rgb, argb2alpha)
-      val r = pixels2Channel(rgb, argb2red)
-      val g = pixels2Channel(rgb, argb2green)
-      val b = pixels2Channel(rgb, argb2blue)
-
-      (a, r, g, b)
-   }
-
-   private def pixels2Channel(pixels: Array[Int], operator: (Int) => Int) =
-   {
-      val channel = pixels map operator
-      val ret = new BufferedImage(buffer.getWidth(), buffer.getHeight(), BufferedImage.TYPE_BYTE_GRAY)
-
-      ret.getRaster.setPixels(
-         0,
-         0,
-         buffer.getWidth,
-         buffer.getHeight,
-         channel)
-
-      new GreyScaleImage(ret)
-   }
-
-   override def equals(that: Any) = {
-      that match {
-         case x: RGBImage => this.intPixels.deep == x.intPixels.deep
-         case _ => false
-      }
+   override def equals(other: Any) = other match {
+      case x: RGBImage => (x.r == this.r) && (x.g == this.g) && (x.b == this.b)
    }
 }
 
 object RGBImage
 {
-   /**
-     * Generates a new ARGB image based on four channels, each of them being represented by a greyscale image.
-     * @param alpha  the alpha channel
-     * @param red    the red channel
-     * @param green  the green channel
-     * @param blue   the blue channel
-     * @return       the ARGB image corresponding to the four provided channels.
-     */
-   def apply(alpha: GreyScaleImage,
-             red: GreyScaleImage,
-             green: GreyScaleImage,
-             blue: GreyScaleImage) =
+   def apply(source: File): RGBImage = apply(ImageIO.read(source))
+   def apply(url: URL): RGBImage = apply(ImageIO.read(url))
+
+   def apply(source: BufferedImage): RGBImage =
    {
-      val ret = new BufferedImage(alpha.width, alpha.height, BufferedImage.TYPE_4BYTE_ABGR)
+      val width = source.getWidth
+      val height = source.getHeight
 
-      val a = alpha.bytePixels
-      val r = red.bytePixels
-      val g = green.bytePixels
-      val b = blue.bytePixels
+      val rgb = new Array[Int](3*width*height)
+      source.getRaster.getPixels(0, 0, width, height, rgb)
 
-      val pixels = new Array[Int](4*a.size)
+      val pixels = rgb.grouped(3).toArray
 
-      (0 until a.size).foreach(i => {
-         pixels(i*4) = r(i).toInt
-         pixels(i*4+1) = g(i).toInt
-         pixels(i*4+2) = b(i).toInt
-         pixels(i*4+3) = a(i).toInt
-      })
+      val red = pixels map (p => ((p(0)+MinValue).toByte))
+      val green = pixels map (p => ((p(1)+MinValue).toByte))
+      val blue = pixels map (p => ((p(2)+MinValue).toByte))
 
-      ret.getRaster.setPixels(
-         0,
-         0,
-         alpha.width,
-         alpha.height,
-         pixels)
-
-      new RGBImage(ret)
-   }
-
-   def apply(red: GreyScaleImage,
-             green: GreyScaleImage,
-             blue: GreyScaleImage) =
-   {
-      val ret = new BufferedImage(red.width, red.height, BufferedImage.TYPE_4BYTE_ABGR)
-
-      // Apparently -1 corresponds to the maximal alpha value
-      val a = Array.fill[Byte](red.width*red.height)(-1)
-      val r = red.bytePixels
-      val g = green.bytePixels
-      val b = blue.bytePixels
-
-      val pixels = new Array[Int](4*a.size)
-
-      (0 until a.size).foreach(i => {
-         pixels(i*4) = r(i).toInt
-         pixels(i*4+1) = g(i).toInt
-         pixels(i*4+2) = b(i).toInt
-         pixels(i*4+3) = a(i).toInt
-      })
-
-      ret.getRaster.setPixels(
-         0,
-         0,
-         red.width,
-         red.height,
-         pixels)
-
-      new RGBImage(ret)
+      new RGBImage(
+         new GreyScaleImage(red, width),
+         new GreyScaleImage(green, width),
+         new GreyScaleImage(blue, width)
+      )
    }
 }

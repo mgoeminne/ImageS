@@ -1,47 +1,26 @@
 package mgoeminne.images.core
 
-import java.awt.image.{BufferedImage, DataBufferByte}
+import java.awt.image.{BufferedImage}
 
 /**
   * Binary coded image.
   */
-class BinaryImage(buffer: BufferedImage) extends Image[BinaryImage, Boolean](buffer)
+class BinaryImage(buffer: Array[Boolean], width: Int) extends SingleLayerImage[BinaryImage, Boolean](buffer, width, buffer.size / width)
 {
-   override def asBinary() = this
-
-   override def makeImage(pixels: Array[Int], width: Int, height: Int) =
-   {
+   def toBufferedImage: _root_.java.awt.image.BufferedImage = {
       val ret = new BufferedImage(width, height, BufferedImage.TYPE_BYTE_BINARY)
-      ret.getRaster.setPixels(0, 0, width, height, pixels)
+      ret.getRaster.setPixels(0, 0, width, height, buffer.map(pixel => if(pixel) 0 else 1))
 
-      new BinaryImage(ret)
+      ret
    }
 
-   def asInt(value: Boolean) = value match {
-      case true => 1
-      case false => 0
-   }
+   def toGreyImage = new GreyScaleImage(buffer.map(pixel => if(pixel) Byte.MinValue else Byte.MaxValue), width)
 
-   override def equals(that: Any) = {
-      that match {
-         case x: BinaryImage => this.intPixels.deep == x.intPixels.deep
-         case _ => false
-      }
-   }
-}
+   /**
+     * Reverses the colors of this image: white becomes black, and black becomes white.
+     * @return The reversed version of this image.
+     */
+   def reverse: BinaryImage = new BinaryImage(buffer.map(pixel => !pixel), width)
 
-object BinaryImage
-{
-   def apply(pixels: Array[Boolean], width: Int, height: Int): BinaryImage =
-   {
-      val ret = new BufferedImage(width, height, BufferedImage.TYPE_BYTE_BINARY)
-      ret.getRaster.setPixels(
-         0,
-         0,
-         width,
-         height,
-         pixels.map(p => if(p) 0 else 1))
-
-      new BinaryImage(ret)
-   }
+   override protected def makeImage(buffer: Array[Boolean], width: Int): BinaryImage = new BinaryImage(buffer, width)
 }
