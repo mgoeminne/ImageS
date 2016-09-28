@@ -76,6 +76,23 @@ case class RGBImage(    r: GreyScaleImage,
    override def equals(other: Any) = other match {
       case x: RGBImage => (x.r == this.r) && (x.g == this.g) && (x.b == this.b)
    }
+
+   /**
+     * @return the standard luminance of the image.
+     */
+   def luminance = new GreyScaleImage(
+
+      (r.buffer, g.buffer, b.buffer).zipped.map {
+         case (r: Byte, g: Byte, b: Byte) => {
+            val red = ((r.toInt - Byte.MinValue) * 0.2126)
+            val green = ((g.toInt - Byte.MinValue) * 0.7152)
+            val blue = ((b.toInt - Byte.MinValue) * 0.0722)
+
+            (((red + green + blue) / 3) + Byte.MinValue).toByte
+         }
+      },
+      width
+   )
 }
 
 object RGBImage
