@@ -96,6 +96,12 @@ abstract class Image[T <: Image[T,R], R] (val width: Int, val height: Int)
      */
    def toBufferedImage: BufferedImage
 
+   /**
+     * Reverses the colors of the image.
+     * @return The reversed image.
+     */
+   def reverse: T
+
    protected def singleBuffer: Array[R]
 
    /**

@@ -32,12 +32,11 @@ class GreyScaleImage(buffer: Array[Byte], width: Int) extends SingleLayerImage[G
       new GreyScaleImage(buffer.map(pixel => f(pixel, min, max)), width)
    }
 
-
    /**
      * Reverses the colors of this image: white becomes black, and black becomes white.
      * @return The reversed version of this image.
      */
-   def reverse: GreyScaleImage = new GreyScaleImage(buffer.map(pixel => (Byte.MaxValue - pixel).toByte), width)
+   def reverse: GreyScaleImage = new GreyScaleImage(buffer.map(pixel => (Byte.MaxValue - (pixel - Byte.MinValue)).toByte), width)
 
    /**
      * Transforms this image into a RGB image, the grey scale being replaced by

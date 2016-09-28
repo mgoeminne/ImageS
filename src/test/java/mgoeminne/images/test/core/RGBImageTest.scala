@@ -74,4 +74,12 @@ class RGBImageTest extends FlatSpec with Matchers
       val rot = original.rotate90.rotate270
       original shouldBe rot
    }
+
+   "A reversed image" should "be different from the original image (in general)" in {
+      original.reverse should not be original
+   }
+
+   "An image reversed twice" should "be the original image" in {
+      original.reverse.reverse shouldBe original
+   }
 }

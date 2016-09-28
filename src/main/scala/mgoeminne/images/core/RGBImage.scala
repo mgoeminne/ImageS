@@ -93,6 +93,8 @@ case class RGBImage(    r: GreyScaleImage,
       },
       width
    )
+
+   def reverse = new RGBImage(r.reverse, g.reverse, b.reverse)
 }
 
 object RGBImage

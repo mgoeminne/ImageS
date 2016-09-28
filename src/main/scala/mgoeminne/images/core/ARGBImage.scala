@@ -162,9 +162,11 @@ class ARGBImage(val a: GreyScaleImage,
 
    override protected def singleBuffer: Array[(Byte, Byte, Byte, Byte)] =
       (0 until a.buffer.size).map(i => (a.buffer(i), r.buffer(i), g.buffer(i), b.buffer(i))).toArray
-}
 
-object ARGBImage
-{
-
+   /**
+     * Reverses the colors of the image.
+     *
+     * @return The reversed image.
+     */
+   override def reverse: ARGBImage = new ARGBImage(a.reverse, r.reverse, g.reverse, b.reverse)
 }

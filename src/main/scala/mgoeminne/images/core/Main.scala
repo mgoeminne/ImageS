@@ -12,7 +12,7 @@ object Main
    {
       val test = RGBImage(new File("demo/images/interblocage.jpg"))
 
-      //test.draw()
-      test.rotate90.rotate270.draw()
+      test.draw()
+      test.reverse.draw()
    }
 }

@@ -80,4 +80,12 @@ class BinaryImageTest extends FlatSpec with Matchers
       hist(false).toDouble shouldBe 0.646 +- 0.001
       hist(true).toDouble shouldBe 0.354 +- 0.001
    }
+
+   "A reversed image" should "be different from the original image (in general)" in {
+      original.reverse should not be original
+   }
+
+   "An image reversed twice" should "be the original image" in {
+      original.reverse.reverse shouldBe original
+   }
 }

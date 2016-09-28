@@ -72,4 +72,12 @@ class GreyScaleImageTest extends FlatSpec with Matchers
    "The relative histogram of a greyscale image" should "have a total of 1" in {
       original.histogram.map(_._2).sum.toDouble shouldBe 1.0 +- 0.001
    }
+
+   "A reversed image" should "be different from the original image (in general)" in {
+      original.reverse should not be original
+   }
+
+   "An image reversed twice" should "be the original image" in {
+      original.reverse.reverse shouldBe original
+   }
 }
