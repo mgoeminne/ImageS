@@ -1,10 +1,9 @@
 package mgoeminne.images.core
 
 import java.awt.image.BufferedImage
-import java.io.File
-import java.net.URL
-import javax.imageio.ImageIO
 import javax.swing.{ImageIcon, JFrame, JLabel, JPanel}
+
+import mgoeminne.images.core.mask.Mask
 
 /**
   * A generic representation of an image.
@@ -24,7 +23,7 @@ import javax.swing.{ImageIcon, JFrame, JLabel, JPanel}
   * @tparam T the type of concrete image.
   * @tparam R the type of object used for the specific representation of the pixels contained in this image.
   */
-abstract class Image[T <: Image[T,R], R] (val width: Int, val height: Int)
+abstract class Image[T <: Image[T,R], R] (val width: Int, val height: Int) extends Canvas[T,R]
 {
    def draw(title: String = ""): Unit =
    {
@@ -36,54 +35,6 @@ abstract class Image[T <: Image[T,R], R] (val width: Int, val height: Int)
       frame.pack()
       frame.setVisible(true)
    }
-
-   /**
-     * Flips the image horizontally, so that left pixels correspond to the right pixels, and vice versa.
-     * @return A horizontally flipped version of this image.
-     */
-   def horizontalFlip: T
-
-   /**
-     * Flips the image vertically, so that top pixels correspond to the bottom pixels, and vice versa.
-     * @return A vertically flipped version of this image.
-     */
-   def verticalFlip: T
-
-   /**
-     * Transposes this image.
-     * @return The transpose of this image.
-     */
-   def transpose: T
-
-   /**
-     * Rotates the image by 90° clockwise around its center, with no loss of pixel data.
-     * @return this image after a rotation by 90° clockwise.
-     */
-   def rotate90: T
-
-
-   /**
-     * Rotates the image by 180° around its center, with no loss of pixel data.
-     * @return this image after a rotation by 180°.
-     */
-   def rotate180: T
-
-
-   /**
-     * Rotates the image by 270° clockwise around its center, with no loss of pixel data.
-     * @return this image after a rotation by 270° clockwise, or 90° counterclockwise.
-     */
-   def rotate270: T
-
-   /**
-     * Rotates the image by an arbitrary angle clockwise around its center.
-     * Since the value of each pixel is approximated, such a rotate may (and typically will)
-     * modify the image, in such a way that even a rotation of 360° doesn't correspond exactly
-     * to the original image.
-     * @param angle the rotation angle, in degrees.
-     * @return this image after a rotation of the specified angle, clockwise.
-     */
-   def rotate(angle: Float, default: R): T
 
    /**
      * @return the relative histogram of this image.
@@ -112,9 +63,36 @@ abstract class Image[T <: Image[T,R], R] (val width: Int, val height: Int)
      */
    def binarize(predicate: R => Boolean): BinaryImage = new BinaryImage(singleBuffer.map(predicate), width)
 
+   /**
+     * Rotates the canvas by an arbitrary angle clockwise around its center.
+     * Since the value of each pixel is approximated, such a rotate may (and typically will)
+     * modify the canvas, in such a way that even a rotation of 360° doesn't correspond exactly
+     * to the original canvas.
+     * @param angle the rotation angle, in degrees.
+     * @param default the value to give to pixels that "appear" due to the rotation.
+     * @return this canvas after a rotation of the specified angle, clockwise.
+     */
+   def rotate(angle: Float, default: R): T
+
    protected def asInt(alpha: Byte, r: Byte, g: Byte, b: Byte): Int =
       ((alpha.toInt - Byte.MinValue) << 24) |
       ((r.toInt - Byte.MinValue) << 0) |
       ((g.toInt - Byte.MinValue) << 8) |
       ((b.toInt - Byte.MinValue) << 16)
+
+   /**
+     * Applies a mask on this image for produced a masked image.
+     * Masked and unmasked pixels in a masked image can be transformed differently.
+     * @param mask The mask to apply.
+     * @return The resulting masked image.
+     */
+   //def apply(mask: Mask) = MaskedImage(this, mask)
+
+   /**
+     * Changes the value of the masked pixels for the specified value.
+     * @param mask  The mask to apply to the image.
+     * @param value The new value of the masked pixel.
+     * @return      The image, in which masked pixels have been replaced by specified value.
+     */
+   def maskToValue(mask: Mask, value: R): T
 }

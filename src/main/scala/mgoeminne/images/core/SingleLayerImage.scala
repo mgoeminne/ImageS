@@ -1,10 +1,9 @@
 package mgoeminne.images.core
 
+import mgoeminne.images.core.mask.Mask
+
 import scala.reflect.ClassTag
 
-/**
-  * Created by mg on 24/09/16.
-  */
 abstract class SingleLayerImage[T <: Image[T,R] : ClassTag, R: ClassTag](val buffer: Array[R], width: Int, height: Int) extends Image[T,R](width, height)
 {
    def horizontalFlip = {
@@ -12,7 +11,7 @@ abstract class SingleLayerImage[T <: Image[T,R] : ClassTag, R: ClassTag](val buf
       makeImage(data.toArray.flatten, width)
    }
 
-   def verticalFlip: T = makeImage(buffer.grouped(width).toArray.reverse.flatten, width)
+   def verticalFlip = makeImage(buffer.grouped(width).toArray.reverse.flatten, width)
 
    override def hashCode = this.buffer.hashCode
 
@@ -57,7 +56,7 @@ abstract class SingleLayerImage[T <: Image[T,R] : ClassTag, R: ClassTag](val buf
       makeImage(ret, width)
    }
 
-   def rotate270: T =
+   def rotate270 =
    {
      val ret = new Array[R](width*height)
 
@@ -70,7 +69,7 @@ abstract class SingleLayerImage[T <: Image[T,R] : ClassTag, R: ClassTag](val buf
       makeImage(ret, height)
    }
 
-   def rotate(angle: Float, default: R): T = {
+   def rotate(angle: Float, default: R) = {
       val w = width
       val h = height
       val angle_radians = Math.toRadians(angle % 360)
@@ -163,9 +162,18 @@ abstract class SingleLayerImage[T <: Image[T,R] : ClassTag, R: ClassTag](val buf
      * @return A new image, corresponding to this after the transformation function
      *         has been applied to each of its pixels.
      */
-   def transform(f: R => R): T = makeImage((buffer.map(f)), width)
+   def transform(f: R => R) = makeImage((buffer.map(f)), width)
 
    def histogram = buffer.groupBy(identity).mapValues(v => v.size / buffer.size.toFloat)
+
+   override def maskToValue(mask: Mask, value: R): T = {
+      val f: (R,Boolean) => R = (a:R, b:Boolean) => if(b) value else a
+
+      makeImage(
+         (buffer.zip(mask.selection.buffer)).map(x => f(x._1, x._2)),
+         width
+      )
+   }
 
    override def singleBuffer: Array[R] = buffer
 

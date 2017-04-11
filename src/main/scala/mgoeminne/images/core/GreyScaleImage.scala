@@ -13,7 +13,7 @@ class GreyScaleImage(buffer: Array[Byte], width: Int) extends SingleLayerImage[G
    buffer.size / width)
 {
    /**
-     * Linearly the image in such a way the lowest grey tone takes the lowest value,
+     * Transforms the image in such a way the lowest grey tone takes the lowest value,
      * and the highest grey tone takes the highest value.
      */
    def normalized() =
@@ -59,4 +59,8 @@ class GreyScaleImage(buffer: Array[Byte], width: Int) extends SingleLayerImage[G
    }
 
    override protected def makeImage(buffer: Array[Byte], width: Int): GreyScaleImage = new GreyScaleImage(buffer, width)
+}
+
+object GreyScaleImage{
+   def apply(width: Int, height: Int, color: Byte) = new GreyScaleImage(Array.fill(width*height)(color), width)
 }

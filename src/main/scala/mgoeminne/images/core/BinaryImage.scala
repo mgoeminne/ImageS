@@ -24,3 +24,22 @@ class BinaryImage(buffer: Array[Boolean], width: Int) extends SingleLayerImage[B
 
    override protected def makeImage(buffer: Array[Boolean], width: Int): BinaryImage = new BinaryImage(buffer, width)
 }
+
+object BinaryImage{
+
+   /**
+     * Creates a binary image in which each pixel is set to false.
+     * @param width  The image width.
+     * @param height The image height.
+     * @return A binary image of size (width * height) in which each pixel is set to false.
+     */
+   def falseImage(width: Int, height: Int) = new BinaryImage(Array.fill(width*height)(false), width)
+
+   /**
+     * Creates a binary image in which each pixel is set to true.
+     * @param width  The image width.
+     * @param height The image height.
+     * @return A binary image of size (width * height) in which each pixel is set to true.
+     */
+   def trueImage(width: Int, height: Int) = new BinaryImage(Array.fill(width*height)(true), width)
+}

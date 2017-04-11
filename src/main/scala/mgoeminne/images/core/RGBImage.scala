@@ -6,6 +6,8 @@ import java.io.File
 import java.net.URL
 import javax.imageio.ImageIO
 
+import mgoeminne.images.core.mask.Mask
+
 import scala.Byte.MinValue
 
 /**
@@ -13,7 +15,7 @@ import scala.Byte.MinValue
   */
 case class RGBImage(    r: GreyScaleImage,
                         g: GreyScaleImage,
-                        b: GreyScaleImage) extends Image[RGBImage, (Byte, Byte, Byte)](r.width, r.height)
+                        b: GreyScaleImage) extends MultiLayerImage[RGBImage, GreyScaleImage, (Byte, Byte, Byte), Byte](r.width, r.height)
 {
    override def toBufferedImage() =
    {
@@ -27,17 +29,9 @@ case class RGBImage(    r: GreyScaleImage,
       ret
    }
 
-   override def horizontalFlip: RGBImage = new RGBImage(r.horizontalFlip, g.horizontalFlip, b.horizontalFlip)
 
-   override def verticalFlip: RGBImage = new RGBImage(r.verticalFlip, g.verticalFlip, b.verticalFlip)
 
-   override def transpose: RGBImage = new RGBImage(r.transpose, g.transpose, b.transpose)
 
-   override def rotate90: RGBImage = new RGBImage(r.rotate90, g.rotate90, b.rotate90)
-
-   override def rotate180: RGBImage = new RGBImage(r.rotate180, g.rotate180, b.rotate180)
-
-   override def rotate270: RGBImage = new RGBImage(r.rotate270, g.rotate270, b.rotate270)
 
    /**
      * Rotates the image by an arbitrary angle clockwise around its center.
@@ -54,6 +48,7 @@ case class RGBImage(    r: GreyScaleImage,
       b.rotate(angle, default._3)
    )
 
+
    /**
      * @return the relative histogram of this image.
      */
@@ -63,19 +58,25 @@ case class RGBImage(    r: GreyScaleImage,
       .map { case (r: Byte, g: Byte, b: Byte) => (r,g,b)}
       .groupBy(identity).mapValues(value => value.size / r.buffer.size.toFloat)
 
+
    def toARGB(alpha: Byte) = new ARGBImage(new GreyScaleImage(Array.fill[Byte](r.buffer.size)(alpha), r.width), r, g, b)
 
+
    def toARGB(alpha: GreyScaleImage) = new ARGBImage(alpha, r, g, b)
+
 
    def asGreyScaleImage = new GreyScaleImage( (r.buffer, g.buffer, b.buffer).zipped
                                                                             .map { case (r,g,b) => ((r.toInt+b.toInt+b.toInt) / 3).toByte } , width)
 
+
    override protected def singleBuffer: Array[(Byte, Byte, Byte)] =
       (0 until r.buffer.size).map(i => (r.buffer(i), g.buffer(i), b.buffer(i))).toArray
+
 
    override def equals(other: Any) = other match {
       case x: RGBImage => (x.r == this.r) && (x.g == this.g) && (x.b == this.b)
    }
+
 
    /**
      * @return the standard luminance of the image.
@@ -94,13 +95,24 @@ case class RGBImage(    r: GreyScaleImage,
       width
    )
 
-   def reverse = new RGBImage(r.reverse, g.reverse, b.reverse)
+   override def maskToValue(mask: Mask, value: (Byte, Byte, Byte)) = {
+      new RGBImage(
+         r.maskToValue(mask, value._1),
+         g.maskToValue(mask, value._2),
+         b.maskToValue(mask, value._3)
+      )
+   }
+
+   override def applyOnEachLayer(f: (GreyScaleImage) => GreyScaleImage): RGBImage = new RGBImage(f(r), f(g), f(b))
 }
 
 object RGBImage
 {
    def apply(source: File): RGBImage = apply(ImageIO.read(source))
+
+
    def apply(url: URL): RGBImage = apply(ImageIO.read(url))
+
 
    def apply(source: BufferedImage): RGBImage =
    {
@@ -122,4 +134,10 @@ object RGBImage
          new GreyScaleImage(blue, width)
       )
    }
+
+   def apply(width: Int, height: Int, r: Byte, g:Byte, b:Byte) = new RGBImage(
+      GreyScaleImage(width, height, r),
+      GreyScaleImage(width, height, g),
+      GreyScaleImage(width, height, b)
+   )
 }
