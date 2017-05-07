@@ -23,6 +23,8 @@ class BinaryImage(buffer: Array[Boolean], width: Int) extends SingleLayerImage[B
    def reverse: BinaryImage = new BinaryImage(buffer.map(pixel => !pixel), width)
 
    override protected def makeImage(buffer: Array[Boolean], width: Int): BinaryImage = new BinaryImage(buffer, width)
+
+   override def bgColor: Boolean = false
 }
 
 object BinaryImage{

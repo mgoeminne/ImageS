@@ -104,4 +104,6 @@ class ARGBImage(val a: GreyScaleImage,
    }
 
    override def applyOnEachLayer(f: (GreyScaleImage) => GreyScaleImage): ARGBImage = new ARGBImage(f(a), f(r), f(b), f(g))
+
+   override def bgColor: (Byte, Byte, Byte, Byte) = (0,0,0, Byte.MinValue)
 }

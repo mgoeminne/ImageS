@@ -1,4 +1,4 @@
-package mgoeminne.images.test.core
+package core
 
 import java.io.File
 
@@ -81,5 +81,9 @@ class RGBImageTest extends FlatSpec with Matchers
 
    "An image reversed twice" should "be the original image" in {
       original.reverse.reverse shouldBe original
+   }
+
+   "A cut image" should "have the appropriate dimensions" in {
+      original.cut(10, 15, 100, 26).shape shouldBe (100, 26)
    }
 }

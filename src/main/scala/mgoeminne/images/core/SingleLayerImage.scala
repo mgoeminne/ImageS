@@ -11,6 +11,21 @@ abstract class SingleLayerImage[T <: Image[T,R] : ClassTag, R: ClassTag](val buf
       makeImage(data.toArray.flatten, width)
    }
 
+   /**
+     * Converts a pixel index into a coordinate, according to the image dimensions.
+     * @param index The considered index.
+     * @return The coordinate (x,y) corresponding to the index.
+     */
+   protected def index_to_coordinate(index: Int) = (index % width , index / width)
+
+   /**
+     * Converts a pixel coordinate into its associated index, according to the image dimensions.
+     * @param x The pixel abscisse.
+     * @param y The pixel ordinate.
+     * @return The index associated to the specified coordinate.
+     */
+   protected def coordinate_to_index(x: Int, y: Int) = y*width + x
+
    def verticalFlip = makeImage(buffer.grouped(width).toArray.reverse.flatten, width)
 
    override def hashCode = this.buffer.hashCode
@@ -182,5 +197,17 @@ abstract class SingleLayerImage[T <: Image[T,R] : ClassTag, R: ClassTag](val buf
          case x: SingleLayerImage[T,R] => this.width == x.width && (this.buffer.deep == x.buffer.deep)
          case _ => false
       }
+   }
+
+   override def cut(x: Int, y: Int, width: Int, height: Int) = {
+      val n_buff = buffer.zipWithIndex.filter(e => {
+         val coordinate = index_to_coordinate(e._2)
+         coordinate._1 >= x &&
+         coordinate._1 < x+width &&
+         coordinate._2 >= y &&
+         coordinate._2 < y + height
+      }).map(_._1)
+
+      makeImage(n_buff, width)
    }
 }

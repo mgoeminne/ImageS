@@ -28,4 +28,6 @@ abstract class MultiLayerImage[C <: MultiLayerImage[C,T,R,S], T <: SingleLayerIm
    final override def rotate180 = this.applyOnEachLayer(_.rotate180)
 
    final override def rotate270 = this.applyOnEachLayer(_.rotate270)
+
+   final override def cut(x: Int, y: Int, width: Int, height: Int) = this.applyOnEachLayer(_.cut(x, y, width, height))
 }

@@ -3,7 +3,7 @@ package mgoeminne.images.core
 import java.awt.image.BufferedImage
 import javax.swing.{ImageIcon, JFrame, JLabel, JPanel}
 
-import mgoeminne.images.core.mask.Mask
+import mgoeminne.images.core.mask.{Mask, MaskedImage}
 
 /**
   * A generic representation of an image.
@@ -86,7 +86,7 @@ abstract class Image[T <: Image[T,R], R] (val width: Int, val height: Int) exten
      * @param mask The mask to apply.
      * @return The resulting masked image.
      */
-   //def apply(mask: Mask) = MaskedImage(this, mask)
+   def mask(mask: Mask) = MaskedImage(mask, this)
 
    /**
      * Changes the value of the masked pixels for the specified value.
@@ -95,4 +95,8 @@ abstract class Image[T <: Image[T,R], R] (val width: Int, val height: Int) exten
      * @return      The image, in which masked pixels have been replaced by specified value.
      */
    def maskToValue(mask: Mask, value: R): T
+
+   def bgColor: R
+
+   def shape = (width, height)
 }

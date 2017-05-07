@@ -59,6 +59,8 @@ class GreyScaleImage(buffer: Array[Byte], width: Int) extends SingleLayerImage[G
    }
 
    override protected def makeImage(buffer: Array[Byte], width: Int): GreyScaleImage = new GreyScaleImage(buffer, width)
+
+   override def bgColor: Byte = Byte.MinValue
 }
 
 object GreyScaleImage{

@@ -1,13 +1,15 @@
-package mgoeminne.images.test.core
+package core
 
 import java.io.File
 
 import mgoeminne.images.core.{ARGBImage, RGBImage}
 import org.scalatest.{FlatSpec, Matchers}
 
-class GreyScaleImageTest extends FlatSpec with Matchers
+class BinaryImageTest extends FlatSpec with Matchers
 {
-   val original = RGBImage(new File("demo/images/interblocage.jpg")).asGreyScaleImage
+   val original = RGBImage(new File("demo/images/interblocage.jpg"))
+      .asGreyScaleImage
+      .binarize(x => x >= 0)
 
    "Horizontally flipped image" should "be different from the original image" in {
       val flip = original.horizontalFlip
@@ -24,7 +26,6 @@ class GreyScaleImageTest extends FlatSpec with Matchers
    "Double horizontally flipped image" should "correspond to the image itself" in
       {
          val doubleFlip = original.horizontalFlip.horizontalFlip
-
          original shouldBe doubleFlip
       }
 
@@ -69,8 +70,15 @@ class GreyScaleImageTest extends FlatSpec with Matchers
       original shouldBe rot
    }
 
-   "The relative histogram of a greyscale image" should "have a total of 1" in {
+   "The relative histogram of a binary image" should "have a total of 1" in {
       original.histogram.map(_._2).sum.toDouble shouldBe 1.0 +- 0.001
+   }
+
+   it should "correspond to the histogram observed in an other image tool" in {
+      val hist = original.histogram
+
+      hist(false).toDouble shouldBe 0.646 +- 0.001
+      hist(true).toDouble shouldBe 0.354 +- 0.001
    }
 
    "A reversed image" should "be different from the original image (in general)" in {
@@ -79,5 +87,9 @@ class GreyScaleImageTest extends FlatSpec with Matchers
 
    "An image reversed twice" should "be the original image" in {
       original.reverse.reverse shouldBe original
+   }
+
+   "A cut image" should "have the appropriate dimensions" in {
+      original.cut(10, 15, 100, 26).shape shouldBe (100, 26)
    }
 }

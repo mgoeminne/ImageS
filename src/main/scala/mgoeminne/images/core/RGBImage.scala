@@ -104,6 +104,8 @@ case class RGBImage(    r: GreyScaleImage,
    }
 
    override def applyOnEachLayer(f: (GreyScaleImage) => GreyScaleImage): RGBImage = new RGBImage(f(r), f(g), f(b))
+
+   override def bgColor: (Byte, Byte, Byte) = (0,0,0)
 }
 
 object RGBImage

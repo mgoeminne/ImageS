@@ -80,6 +80,18 @@ case class Mask(selection: BinaryImage) extends Canvas[Mask, Boolean]
      * @return The intersection of this mask and the other mask.
      */
    def union(other: Mask) = combine(other, {(a: Boolean, b: Boolean) => a || b})
+
+   override def draw(title: String): Unit = ???
+
+   /**
+     * Cuts an image by selecting a a rectangle included in the canvas of the current image.
+     *
+     * @param x      The abscisse of the top-left corner of the sub-rectangle.
+     * @param y      The ordinate of the top-left corner of the sub-rectangle.
+     * @param width  The width of the sub-rectangle.
+     * @param height The height of the sub-rectangle.
+     */
+   override def cut(x: Int, y: Int, width: Int, height: Int): Mask = Mask(selection.cut(x, y, width, height))
 }
 
 object Mask{
